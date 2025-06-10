@@ -35,36 +35,10 @@ esac
 
 PKG_PROG_PKG_CONFIG
 PKG_CHECK_MODULES([CYRUS_SASL], [libsasl2],, [AC_MSG_ERROR([Cyrus-SASL not found])])
-CYRUS_SASL_PREFIX=$($PKG_CONFIG --variable=prefix libsasl2)
 CYRUS_SASL_LIBDIR=$($PKG_CONFIG --variable=libdir libsasl2)
-
-AC_ARG_WITH(
-  [cyrus-sasl],
-  AS_HELP_STRING([--with-cyrus-sasl=[[PREFIX]]], [Installation prefix of Cyrus-SASL (defaults to /usr)]),
-  [CYRUS_SASL_PREFIXES=$withval],
-  [CYRUS_SASL_PREFIXES=$CYRUS_SASL_PREFIX]
-)
-
-for prefix in "$CYRUS_SASL_PREFIXES"; do
-  ac_save_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="-I$prefix/include $CPPFLAGS"
-  AC_CHECK_HEADER([sasl/sasl.h], [
-    CYRUS_SASL_CPPFLAGS="-I$prefix/include"
-    CYRUS_SASL_PREFIX="$prefix"
-  ])
-  CPPFLAGS="$ac_save_CPPFLAGS"
-  if test -n "$CYRUS_SASL_PREFIX"; then
-    break
-  fi
-done
-
-if test -z "$CYRUS_SASL_PREFIX"; then
-  AC_MSG_ERROR([Cyrus-SASL not found under $CYRUS_SASL_PREFIX])
-fi
 
 AC_SUBST(CYRUS_SASL_CFLAGS)
 AC_SUBST([CYRUS_SASL_CPPFLAGS], [$CYRUS_SASL_CPPFLAGS])
 AC_SUBST([CYRUS_SASL_LDFLAGS], [$CYRUS_SASL_LDFLAGS])
 AC_SUBST(CYRUS_SASL_LIBDIR)
-AC_SUBST([CYRUS_SASL_PREFIX], [$CYRUS_SASL_PREFIX])
 AC_OUTPUT
