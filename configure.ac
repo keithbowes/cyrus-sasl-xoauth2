@@ -26,10 +26,6 @@ AC_PROG_CC
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile])
 
-CYRUS_SASL_CPPFLAGS=
-CYRUS_SASL_PREFIX=/usr
-CYRUS_SASL_LDFLAGS=
-
 # Cygwin stuff
 case "$host" in
   *-*-cygwin*)
@@ -37,11 +33,16 @@ case "$host" in
     ;;
 esac
 
+PKG_PROG_PKG_CONFIG
+PKG_CHECK_MODULES([CYRUS_SASL], [libsasl2],, [AC_MSG_ERROR([Cyrus-SASL not found])])
+CYRUS_SASL_PREFIX=$($PKG_CONFIG --variable=prefix libsasl2)
+CYRUS_SASL_LIBDIR=$($PKG_CONFIG --variable=libdir libsasl2)
+
 AC_ARG_WITH(
   [cyrus-sasl],
   AS_HELP_STRING([--with-cyrus-sasl=[[PREFIX]]], [Installation prefix of Cyrus-SASL (defaults to /usr)]),
   [CYRUS_SASL_PREFIXES=$withval],
-  [CYRUS_SASL_PREFIXES=/usr]
+  [CYRUS_SASL_PREFIXES=$CYRUS_SASL_PREFIX]
 )
 
 for prefix in "$CYRUS_SASL_PREFIXES"; do
@@ -61,7 +62,9 @@ if test -z "$CYRUS_SASL_PREFIX"; then
   AC_MSG_ERROR([Cyrus-SASL not found under $CYRUS_SASL_PREFIX])
 fi
 
+AC_SUBST(CYRUS_SASL_CFLAGS)
 AC_SUBST([CYRUS_SASL_CPPFLAGS], [$CYRUS_SASL_CPPFLAGS])
 AC_SUBST([CYRUS_SASL_LDFLAGS], [$CYRUS_SASL_LDFLAGS])
+AC_SUBST(CYRUS_SASL_LIBDIR)
 AC_SUBST([CYRUS_SASL_PREFIX], [$CYRUS_SASL_PREFIX])
 AC_OUTPUT
